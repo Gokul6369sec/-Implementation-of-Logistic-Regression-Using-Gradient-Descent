@@ -8,101 +8,95 @@ To write a program to implement the the Logistic Regression Using Gradient Desce
 2. Anaconda – Python 3.7 Installation / Jupyter notebook
 
 ## Algorithm
+1. Start the program.
+2. Data preprocessing:
+3. Cleanse data,handle missing values,encode categorical variables.
+4. Model Training:Fit logistic regression model on preprocessed data.
+5. Model Evaluation:Assess model performance using metrics like accuracyprecisioon,recall.
+6. Prediction: Predict placement status for new student data using trained model.
+7. End the program.
 
-1.Import the data file and import numpy, matplotlib and scipy.
-
-2.Visulaize the data and define the sigmoid function, cost function and gradient descent.
-
-3.Plot the decision boundary .
-
-4.Calculate the y-prediction.
 ## Program:
-/*
-Program to implement the the Logistic Regression Using Gradient Descent.
 
-Developed by: gokulan r
-
-RegisterNumber: 212224230076
-
-*/
 ```
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
+
+# Load and preprocess the data
 data = pd.read_csv("Placement_Data.csv")
-data.head()
+data1 = data.drop(['sl_no', 'salary'], axis=1)
+
 from sklearn.preprocessing import LabelEncoder
-
 le = LabelEncoder()
+data1["gender"] = le.fit_transform(data1["gender"])
+data1["ssc_b"] = le.fit_transform(data1["ssc_b"])
+data1["hsc_b"] = le.fit_transform(data1["hsc_b"])
+data1["hsc_s"] = le.fit_transform(data1["hsc_s"])
+data1["degree_t"] = le.fit_transform(data1["degree_t"])
+data1["workex"] = le.fit_transform(data1["workex"])
+data1["specialisation"] = le.fit_transform(data1["specialisation"])
+data1["status"] = le.fit_transform(data1["status"])
 
-categorical_cols = [
-    'gender', 'ssc_b', 'hsc_b', 'hsc_s',
-    'degree_t', 'workex', 'specialisation', 'status'
-]
+# Split features and target
+X = data1.iloc[:, :-1].values  # Features
+Y = data1["status"].values  # Target variable
 
-for col in categorical_cols:
-    data[col] = le.fit_transform(data[col])
-
-data.head()
-X = data.drop(['status', 'salary'], axis=1).values
-y = data['status'].values.reshape(-1, 1)
+# Feature Scaling
 from sklearn.preprocessing import StandardScaler
-
 scaler = StandardScaler()
 X = scaler.fit_transform(X)
-from sklearn.model_selection import train_test_split
 
-X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=0.2, random_state=42
-)
-m, n = X_train.shape   # samples, features
-w = np.zeros((n, 1))   # weights
-b = 0                 # bias
+# Initialize parameters
+theta = np.random.randn(X.shape[1])  # Random initialization
+alpha = 0.01  # Learning rate
+num_iterations = 1000  # Number of iterations
 
-alpha = 0.01           # learning rate
-iterations = 3000      # number of iterations
+# Define sigmoid function
 def sigmoid(z):
     return 1 / (1 + np.exp(-z))
-losses = []
 
-for i in range(iterations):
-    z = np.dot(X_train, w) + b
-    y_hat = sigmoid(z)
-    
-    dw = (1/m) * np.dot(X_train.T, (y_hat - y_train))
-    db = (1/m) * np.sum(y_hat - y_train)
-    
-    w -= alpha * dw
-    b -= alpha * db
-    
-    loss = -(1/m) * np.sum(
-        y_train * np.log(y_hat + 1e-9) + 
-        (1 - y_train) * np.log(1 - y_hat + 1e-9)
-    )
-    losses.append(loss)
+# Define loss function
+def loss(theta, X, y):
+    h = sigmoid(X.dot(theta))
+    return -np.sum(y * np.log(h + 1e-15) + (1 - y) * np.log(1 - h + 1e-15)) / len(y)
 
-print("Training completed")
-plt.plot(losses)
-plt.xlabel("Iterations")
-plt.ylabel("Loss")
-plt.title("Loss vs Iterations (Gradient Descent)")
-plt.show()
-def predict(X):
-    z = np.dot(X, w) + b
-    y_pred = sigmoid(z)
-    return (y_pred >= 0.5).astype(int)
-y_pred = predict(X_test)
+# Gradient Descent function
+def gradient_descent(theta, X, y, alpha, num_iterations):
+    m = len(y)
+    for i in range(num_iterations):
+        h = sigmoid(X.dot(theta))
+        gradient = X.T.dot(h - y) / m
+        theta -= alpha * gradient
+    return theta
 
-accuracy = np.mean(y_pred == y_test)
+# Train the model
+theta = gradient_descent(theta, X, Y, alpha, num_iterations)
+
+# Prediction function
+def predict(theta, X):
+    h = sigmoid(X.dot(theta))
+    return np.where(h >= 0.5, 1, 0)
+
+# Model evaluation
+y_pred = predict(theta, X)
+accuracy = np.mean(y_pred == Y)
+
+# Display Results
 print("Accuracy:", accuracy)
-from sklearn.metrics import confusion_matrix, classification_report
+print("\nPredicted:\n", y_pred)
+print("\nActual:\n", Y)
 
-print("Confusion Matrix:\n", confusion_matrix(y_test, y_pred))
-print("\nClassification Report:\n", classification_report(y_test, y_pred))
+# Predictions for new data
+xnew = np.array([[0, 87, 0, 95, 0, 2, 78, 2, 0, 0, 1, 0]])  # Example input
+xnew = scaler.transform(xnew)  # Apply same scaling as training data
+y_prednew = predict(theta, xnew)
+print("\nPredicted Result:", y_prednew)
+Name : gokulan r
+Reg No: 212224230076
 ```
-
 ## Output:
-<img width="605" height="634" alt="image" src="https://github.com/user-attachments/assets/d6e5d40a-d48c-47ee-a728-041835d588f5" />
+![image](https://github.com/user-attachments/assets/6bfd986b-c065-40ac-b20f-65e9ea0d59d4)
+
 
 
 ## Result:
